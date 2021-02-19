@@ -1,9 +1,9 @@
 module control (
 	input logic [31:0] instruction,
 	output logic [31:0] immediate,
-	output logic [2:0] alu_op,
+	output logic [2:0] alu_op, xfer_size,
 	output logic [1:0] shift_type,
-	output logic reg_write, alu_src, auipc, shift, slt
+	output logic reg_write, alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg
 //	output logic cf_reg_write, cf_mem_to_reg, cf_alu_op, cf_alu_src, cf_slt, cf_shift, cf_shift_type
 	);
 	
@@ -126,7 +126,7 @@ module control (
 		else
 			alu_op = 0;
 	end
-	assign alu_src = (i_lui || i_auipc || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_addi || i_slti || i_sltiu ||
+	assign alu_src = (i_lui || i_auipc || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_sb || i_sh || i_sw || i_addi || i_slti || i_sltiu ||
 							i_xori || i_ori || i_andi || i_slli || i_srli || i_srai);
 	assign auipc = i_auipc;
 	assign shift = (i_slli || i_srli || i_srai || i_sll || i_srl || i_sra);
@@ -141,6 +141,19 @@ module control (
 			shift_type = 0;
 	end
 	assign slt = (i_slti || i_sltiu || i_slt || i_sltu);
+	assign mem_write = (i_sb || i_sh || i_sw);
+	assign mem_read = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
+	always_comb begin
+		if (i_lb || i_lbu || i_sb)
+			xfer_size = 1;
+		else if (i_lh || i_lhu || i_sh)
+			xfer_size = 2;
+		else if (i_lw || i_sw)
+			xfer_size = 4;
+		else
+			xfer_size = 4;
+	end
+	assign mem_to_reg = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
 endmodule
 
 module control_tb ();
