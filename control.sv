@@ -3,7 +3,7 @@ module control (
 	output logic [31:0] immediate,
 	output logic [2:0] alu_op, xfer_size,
 	output logic [1:0] shift_type,
-	output logic reg_write, alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg
+	output logic reg_write, alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg, pc_src, jump, jalr
 //	output logic cf_reg_write, cf_mem_to_reg, cf_alu_op, cf_alu_src, cf_slt, cf_shift, cf_shift_type
 	);
 	
@@ -85,21 +85,27 @@ module control (
 	assign i_or 	= reg_reg && (funct3 == 3'b110);
 	assign i_and 	= reg_reg && (funct3 == 3'b111);
 
+	localparam I_TYPE = 3'b0;
+	localparam S_TYPE = 3'b001;
+	localparam B_TYPE = 3'b010;
+	localparam U_TYPE = 3'b011;
+	localparam J_TYPE = 3'b100;
+	
 	// Determine instruction type
 	logic [2:0] i_type;
 	always_comb begin
 		if (reg_imm) // I
-			i_type = 0;
+			i_type = I_TYPE;
 		else if (store) // S
-			i_type = 1;
+			i_type = S_TYPE;
 		else if (branch) // B
-			i_type = 2;
+			i_type = B_TYPE;
 		else if (i_lui || i_auipc) // U
-			i_type = 3;
+			i_type = U_TYPE;
 		else if (i_jal) // J
-			i_type = 4;
+			i_type = J_TYPE;
 		else
-			i_type = 0;
+			i_type = I_TYPE;
 	end
 	
 	// Immediate generation
@@ -107,7 +113,7 @@ module control (
 	
 	// Determine control flags
 	// cf_reg_write, cf_mem_to_reg, cf_alu_op, cf_alu_src, cf_slt, cf_shift, cf_shift_type
-	assign reg_write = (i_lui || i_auipc || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_addi || i_slti || i_sltiu ||
+	assign reg_write = (i_lui || i_auipc || i_jal || i_jalr || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_addi || i_slti || i_sltiu ||
 								i_xori || i_ori || i_andi || i_slli || i_srli || i_srai || i_add || i_sub || i_sll ||
 								i_slt || i_sltu || i_xor || i_srl || i_sra || i_or || i_and);
 	always_comb begin
@@ -154,6 +160,9 @@ module control (
 			xfer_size = 4;
 	end
 	assign mem_to_reg = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
+	assign pc_src = (i_jal || i_jalr);
+	assign jump = (i_jal || i_jalr);
+	assign jalr = i_jalr;
 endmodule
 
 module control_tb ();

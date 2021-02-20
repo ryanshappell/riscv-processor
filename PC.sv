@@ -1,5 +1,6 @@
 module PC (
-	input logic clk, reset, branch_taken,
+	input logic clk, reset, pc_src,
+	input logic [31:0] jump_addr,
 	output logic [31:0] i_addr,
 	output logic can_write
 	);
@@ -20,7 +21,10 @@ module PC (
 		end else begin
 			if (count == 3'b100) begin
 				// Increment PC
-				curr_addr <= curr_addr + 4;
+				if (pc_src)
+					curr_addr <= jump_addr;
+				else
+					curr_addr <= curr_addr + 4;
 				count <= 0;
 			end else
 				count <= count + 1'b1;
@@ -31,7 +35,8 @@ module PC (
 endmodule
 
 module PC_tb ();
-	logic clk, reset, branch_taken;
+	logic clk, reset, pc_src;
+	logic [31:0] jump_addr;
 	logic [31:0] i_addr;
 	logic can_write;
 	
@@ -45,9 +50,17 @@ module PC_tb ();
 	
 	initial begin
 		// 12 clock cycles
-		reset <= 1; @(posedge clk);
+		reset <= 1; pc_src <= 0; jump_addr <= 0; @(posedge clk);
 		reset <= 0; @(posedge clk);
-		for (int i = 0; i < 50; i++) begin
+		for (int i = 0; i < 9; i++) begin
+			@(posedge clk);
+		end
+		pc_src <= 1; @(posedge clk);
+		for (int i = 0; i < 6; i++) begin
+			@(posedge clk);
+		end
+		pc_src <= 0; @(posedge clk);
+		for (int i = 0; i < 9; i++) begin
 			@(posedge clk);
 		end
 		$stop;
