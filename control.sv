@@ -10,14 +10,10 @@ module control (
 	// Sections of instruction
 	logic [6:0] opcode, funct7;
 	logic [2:0] funct3;
-	logic [4:0] rd, rs1, rs2;
 	
 	assign opcode 	= instruction[6:0];
 	assign funct7 	= instruction[31:25];
 	assign funct3 	= instruction[14:12];
-	assign rd 		= instruction[11:7];
-	assign rs1 		= instruction[19:15];
-	assign rs2 		= instruction[24:20];
 	
 	// Basic opcode types
 	logic load, store, branch, reg_imm, reg_reg;
@@ -181,6 +177,8 @@ module control (
 	assign is_unsigned = (i_bltu || i_bgeu || i_lbu || i_lhu || i_sltiu || i_sltu);
 endmodule
 
+`ifndef LINT
 module control_tb ();
 
 endmodule
+`endif

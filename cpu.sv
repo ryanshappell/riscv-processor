@@ -110,6 +110,7 @@ module cpu (
 	assign w_data = p_mem_to_reg[STAGE_3] ? r_data : p_EX_result[STAGE_2];
 endmodule
 
+`ifndef LINT
 module cpu_tb ();
 	logic clk, reset;
 	
@@ -129,3 +130,4 @@ module cpu_tb ();
 		$stop;
 	end
 endmodule
+`endif

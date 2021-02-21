@@ -14,6 +14,7 @@ module shift_N_reg #(parameter WIDTH = 1, HEIGHT = 1) (
 	endgenerate
 endmodule
 
+`ifndef LINT
 module shift_N_reg_tb ();
 	logic clk, reset;
 	logic [5-1:0] in;
@@ -42,3 +43,4 @@ module shift_N_reg_tb ();
 		$stop;
 	end
 endmodule
+`endif

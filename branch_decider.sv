@@ -26,6 +26,7 @@ module branch_decider (
 	end
 endmodule
 
+`ifndef LINT
 module branch_decider_tb ();
 	logic [1:0] branch_type;
 	logic zero, neg, c_out, over;
@@ -49,3 +50,4 @@ module branch_decider_tb ();
 		$stop;
 	end
 endmodule
+`endif

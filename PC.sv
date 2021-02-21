@@ -34,6 +34,7 @@ module PC (
 	assign i_addr = curr_addr;
 endmodule
 
+`ifndef LINT
 module PC_tb ();
 	logic clk, reset, pc_src;
 	logic [31:0] jump_addr;
@@ -66,3 +67,4 @@ module PC_tb ();
 		$stop;
 	end
 endmodule
+`endif

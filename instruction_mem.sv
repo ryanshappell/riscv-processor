@@ -17,6 +17,7 @@ module instruction_mem (
 //	end
 endmodule
 
+`ifndef LINT
 module instruction_mem_tb ();
 	logic clk;
 	logic [31:0] i_addr;
@@ -46,3 +47,4 @@ module instruction_mem_tb ();
 		$stop;
 	end
 endmodule
+`endif

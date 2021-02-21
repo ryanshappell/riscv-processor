@@ -1,6 +1,8 @@
 module imm_gen (
 	input logic [2:0] i_type,
+	// verilator lint_off UNUSED
 	input logic [31:0] instruction,
+	// verilator lint_on UNUSED
 	output logic [31:0] immediate
 	);
 	
@@ -24,6 +26,7 @@ module imm_gen (
 
 endmodule
 
+`ifndef LINT
 module imm_gen_tb ();
 	logic [2:0] i_type;
 	logic [31:0] instruction;
@@ -39,3 +42,4 @@ module imm_gen_tb ();
 		$stop;
 	end
 endmodule
+`endif

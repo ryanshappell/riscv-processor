@@ -31,7 +31,8 @@ module register_file (
 //	assign r_data1 = r1;
 //	assign r_data2 = r2;
 endmodule
-	
+
+`ifndef LINT
 module register_file_tb ();
 	logic clk, reset, reg_write;
 	logic [4:0] r_addr1, r_addr2, w_addr;
@@ -72,3 +73,4 @@ module register_file_tb ();
 		$stop;
 	end
 endmodule
+`endif

@@ -12,6 +12,7 @@ module D_FF #(parameter HEIGHT = 1) (
 	end
 endmodule
 
+`ifndef LINT
 module D_FF_tb ();
 	logic clk, reset;
 	logic [5-1:0] d;
@@ -39,3 +40,4 @@ module D_FF_tb ();
 		$stop;
 	end
 endmodule
+`endif

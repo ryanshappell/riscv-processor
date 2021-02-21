@@ -14,10 +14,10 @@ module alu (
 		case (alu_op)
 			0: r = A + B;				// add
 			1: r = A + B_sub + 1;	// subtract
-			2: r = A ^ B;				// xor
-			3: r = A | B;				// or
-			4: r = A & B;				// and
-			5: r = B;					// pass B
+			2: r = {1'b0, A ^ B};	// xor
+			3: r = {1'b0, A | B};	// or
+			4: r = {1'b0, A & B};	// and
+			5: r = {1'b0, B};			// pass B
 			default: r = A + B;		// default add
 		endcase
 		
@@ -29,6 +29,7 @@ module alu (
 	end
 endmodule
 
+`ifndef LINT
 module alu_tb ();
 	logic [31:0] A, B;
 	logic [2:0] alu_op;
@@ -57,3 +58,4 @@ module alu_tb ();
 		$stop;
 	end
 endmodule
+`endif

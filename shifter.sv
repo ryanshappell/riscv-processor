@@ -15,6 +15,7 @@ module shifter (
 	end
 endmodule
 
+`ifndef LINT
 module shifter_tb ();
 	logic [31:0] val;
 	logic [4:0] shamt;
@@ -37,3 +38,4 @@ module shifter_tb ();
 		$stop;
 	end
 endmodule
+`endif

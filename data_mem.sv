@@ -1,5 +1,7 @@
 module data_mem (
+	// verilator lint_off UNUSED
 	input logic clk, mem_write, mem_read, is_unsigned,
+	// verilator lint_on UNUSED
 	input logic [2:0] xfer_size,
 	input logic [31:0] address, w_data,
 	output logic [31:0] r_data
@@ -18,8 +20,8 @@ module data_mem (
 	
 	always_comb begin
 		case (xfer_size)
-			1: byte_en = (1 << (address % 4)); // one of the 4 bytes enabled
-			2: byte_en = (2'b11 << (2 * ((address % 4) / 2))); // 4'b1100 or 4'b0011
+			1: byte_en = (4'b1 << (address % 4)); // one of the 4 bytes enabled
+			2: byte_en = (4'b11 << (2 * ((address % 4) / 2))); // 4'b1100 or 4'b0011
 			4:	byte_en = 4'b1111;
 			default: byte_en = 4'b1111;
 		endcase
@@ -27,18 +29,18 @@ module data_mem (
 		case (xfer_size_next)
 			1: begin
 				if (is_unsigned)
-					r_data <= {24'b0, word[address_next % 4]};
+					r_data = {24'b0, word[address_next % 4]};
 				else
-					r_data <= {{24{word[address_next % 4][7]}}, word[address_next % 4]};
+					r_data = {{24{word[address_next % 4][7]}}, word[address_next % 4]};
 			end
 			2: begin
 				if (is_unsigned)
-					r_data <= {16'b0, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
+					r_data = {16'b0, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
 				else
-					r_data <= {{16{word[2 * ((address_next % 4) / 2) + 1][7]}}, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
+					r_data = {{16{word[2 * ((address_next % 4) / 2) + 1][7]}}, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
 			end
-			4: r_data <= word;
-			default: r_data <= word;
+			4: r_data = word;
+			default: r_data = word;
 		endcase
 	end
 	
@@ -80,6 +82,7 @@ module data_mem (
 	end
 endmodule
 
+`ifndef LINT
 module data_mem_tb ();
 	logic clk, mem_write, mem_read, is_unsigned;
 	logic [2:0] xfer_size;
@@ -122,3 +125,4 @@ module data_mem_tb ();
 		$stop;
 	end
 endmodule
+`endif
