@@ -1,5 +1,5 @@
 module data_mem (
-	input logic clk, mem_write, mem_read,
+	input logic clk, mem_write, mem_read, is_unsigned,
 	input logic [2:0] xfer_size,
 	input logic [31:0] address, w_data,
 	output logic [31:0] r_data
@@ -25,8 +25,18 @@ module data_mem (
 		endcase
 		
 		case (xfer_size_next)
-			1: r_data <= {{24{word[address_next % 4][7]}}, word[address_next % 4]};
-			2: r_data <= {{16{word[2 * ((address_next % 4) / 2) + 1][7]}}, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
+			1: begin
+				if (is_unsigned)
+					r_data <= {24'b0, word[address_next % 4]};
+				else
+					r_data <= {{24{word[address_next % 4][7]}}, word[address_next % 4]};
+			end
+			2: begin
+				if (is_unsigned)
+					r_data <= {16'b0, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
+				else
+					r_data <= {{16{word[2 * ((address_next % 4) / 2) + 1][7]}}, word[2 * ((address_next % 4) / 2) + 1], word[2 * ((address_next % 4) / 2)]};
+			end
 			4: r_data <= word;
 			default: r_data <= word;
 		endcase
@@ -71,7 +81,7 @@ module data_mem (
 endmodule
 
 module data_mem_tb ();
-	logic clk, mem_write, mem_read;
+	logic clk, mem_write, mem_read, is_unsigned;
 	logic [2:0] xfer_size;
 	logic [31:0] address, w_data;
 	logic [31:0] r_data;

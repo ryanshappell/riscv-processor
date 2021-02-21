@@ -1,9 +1,9 @@
 module control (
 	input logic [31:0] instruction,
 	output logic [31:0] immediate,
-	output logic [2:0] alu_op, xfer_size,
+	output logic [2:0] alu_op, xfer_size, branch_type,
 	output logic [1:0] shift_type,
-	output logic reg_write, alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg, pc_src, jump, jalr
+	output logic reg_write, alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg, jump, jalr, is_unsigned
 //	output logic cf_reg_write, cf_mem_to_reg, cf_alu_op, cf_alu_src, cf_slt, cf_shift, cf_shift_type
 	);
 	
@@ -119,7 +119,7 @@ module control (
 	always_comb begin
 		if (i_auipc || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_sb || i_sh || i_sw || i_addi || i_add)
 			alu_op = 0;
-		else if (i_slti || i_sltiu || i_sub || i_slt || i_sltu)
+		else if (i_beq || i_bne || i_blt || i_bge || i_bltu || i_bgeu || i_slti || i_sltiu || i_sub || i_slt || i_sltu)
 			alu_op = 1;
 		else if (i_xori || i_xor)
 			alu_op = 2;
@@ -160,9 +160,25 @@ module control (
 			xfer_size = 4;
 	end
 	assign mem_to_reg = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
-	assign pc_src = (i_jal || i_jalr);
 	assign jump = (i_jal || i_jalr);
 	assign jalr = i_jalr;
+	always_comb begin
+		if (i_beq)
+			branch_type = 1;
+		else if (i_bne)
+			branch_type = 2;
+		else if (i_blt)
+			branch_type = 3;
+		else if (i_bge)
+			branch_type = 4;
+		else if (i_bltu)
+			branch_type = 5;
+		else if (i_bgeu)
+			branch_type = 6;
+		else
+			branch_type = 0;
+	end
+	assign is_unsigned = (i_bltu || i_bgeu || i_lbu || i_lhu || i_sltiu || i_sltu);
 endmodule
 
 module control_tb ();
