@@ -7,7 +7,7 @@ module data_mem (
 	output logic [31:0] r_data
 	);
 	
-	logic [3:0][7:0] mem [15:0]; // TODO: determine how many bytes are needed
+	logic [3:0][7:0] mem [1023:0]; // TODO: determine how many bytes are needed
 	logic [3:0] byte_en;
 	logic [3:0][7:0] word;
 	

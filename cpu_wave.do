@@ -2,7 +2,7 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /cpu_tb/clk
 add wave -noupdate /cpu_tb/reset
-add wave -noupdate -radix decimal /cpu_tb/dut/pc/i_addr
+add wave -noupdate -radix hexadecimal /cpu_tb/dut/pc/i_addr
 add wave -noupdate -radix decimal -childformat {{{/cpu_tb/dut/p_i_addr[1]} -radix decimal} {{/cpu_tb/dut/p_i_addr[0]} -radix decimal}} -expand -subitemconfig {{/cpu_tb/dut/p_i_addr[1]} {-height 15 -radix decimal} {/cpu_tb/dut/p_i_addr[0]} {-height 15 -radix decimal}} /cpu_tb/dut/p_i_addr
 add wave -noupdate -radix hexadecimal /cpu_tb/dut/imem/instruction
 add wave -noupdate -childformat {{{/cpu_tb/dut/rf/regs[31]} -radix decimal} {{/cpu_tb/dut/rf/regs[30]} -radix decimal} {{/cpu_tb/dut/rf/regs[29]} -radix decimal} {{/cpu_tb/dut/rf/regs[28]} -radix decimal} {{/cpu_tb/dut/rf/regs[27]} -radix decimal} {{/cpu_tb/dut/rf/regs[26]} -radix decimal} {{/cpu_tb/dut/rf/regs[25]} -radix decimal} {{/cpu_tb/dut/rf/regs[24]} -radix decimal} {{/cpu_tb/dut/rf/regs[23]} -radix decimal} {{/cpu_tb/dut/rf/regs[22]} -radix decimal} {{/cpu_tb/dut/rf/regs[21]} -radix decimal} {{/cpu_tb/dut/rf/regs[20]} -radix decimal} {{/cpu_tb/dut/rf/regs[19]} -radix decimal} {{/cpu_tb/dut/rf/regs[18]} -radix decimal} {{/cpu_tb/dut/rf/regs[17]} -radix decimal} {{/cpu_tb/dut/rf/regs[16]} -radix decimal} {{/cpu_tb/dut/rf/regs[15]} -radix decimal} {{/cpu_tb/dut/rf/regs[14]} -radix decimal} {{/cpu_tb/dut/rf/regs[13]} -radix decimal} {{/cpu_tb/dut/rf/regs[12]} -radix decimal} {{/cpu_tb/dut/rf/regs[11]} -radix decimal} {{/cpu_tb/dut/rf/regs[10]} -radix decimal} {{/cpu_tb/dut/rf/regs[9]} -radix decimal} {{/cpu_tb/dut/rf/regs[8]} -radix decimal} {{/cpu_tb/dut/rf/regs[7]} -radix decimal} {{/cpu_tb/dut/rf/regs[6]} -radix decimal} {{/cpu_tb/dut/rf/regs[5]} -radix decimal} {{/cpu_tb/dut/rf/regs[4]} -radix decimal} {{/cpu_tb/dut/rf/regs[3]} -radix decimal} {{/cpu_tb/dut/rf/regs[2]} -radix decimal} {{/cpu_tb/dut/rf/regs[1]} -radix decimal} {{/cpu_tb/dut/rf/regs[0]} -radix decimal}} -subitemconfig {{/cpu_tb/dut/rf/regs[31]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[30]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[29]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[28]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[27]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[26]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[25]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[24]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[23]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[22]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[21]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[20]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[19]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[18]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[17]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[16]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[15]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[14]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[13]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[12]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[11]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[10]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[9]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[8]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[7]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[6]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[5]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[4]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[3]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[2]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[1]} {-height 15 -radix decimal} {/cpu_tb/dut/rf/regs[0]} {-height 15 -radix decimal}} /cpu_tb/dut/rf/regs
@@ -29,11 +29,10 @@ add wave -noupdate -radix decimal /cpu_tb/dut/p_jump_addr
 add wave -noupdate /cpu_tb/dut/p_jump
 add wave -noupdate /cpu_tb/dut/p_jalr
 add wave -noupdate -radix decimal /cpu_tb/dut/jump_addr_src
-add wave -noupdate /cpu_tb/dut/test
 add wave -noupdate /cpu_tb/dut/neg
 add wave -noupdate /cpu_tb/dut/p_is_unsigned
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1360 ps} 0}
+WaveRestoreCursors {{Cursor 1} {8166 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 190
 configure wave -valuecolwidth 220
@@ -49,4 +48,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {817 ps} {3211 ps}
+WaveRestoreZoom {7876 ps} {10270 ps}

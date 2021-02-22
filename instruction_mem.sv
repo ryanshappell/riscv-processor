@@ -4,7 +4,7 @@ module instruction_mem (
 	output logic [31:0] instruction
 	);
 	
-	logic [31:0] mem [255:0]; // TODO: determine how many instructions are needed
+	logic [31:0] mem [4095:0]; // TODO: determine how many instructions are needed
 	
 	initial begin
 		$readmemh("code.hex", mem);

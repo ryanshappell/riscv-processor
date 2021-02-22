@@ -39,7 +39,7 @@
 
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE6E22C8
-set_global_assignment -name TOP_LEVEL_ENTITY alu
+set_global_assignment -name TOP_LEVEL_ENTITY top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.0.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:35:15  FEBRUARY 05, 2021"
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.0 Lite Edition"
@@ -47,7 +47,6 @@ set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
-set_global_assignment -name SYSTEMVERILOG_FILE top.sv
 set_location_assignment PIN_87 -to LEDR[0]
 set_location_assignment PIN_86 -to LEDR[1]
 set_location_assignment PIN_85 -to LEDR[2]
@@ -62,9 +61,14 @@ set_location_assignment PIN_136 -to DIG[2]
 set_location_assignment PIN_137 -to DIG[3]
 set_location_assignment PIN_114 -to UART_TXD
 set_location_assignment PIN_115 -to UART_RXD
-set_global_assignment -name SYSTEMVERILOG_FILE uart_tx.sv
-set_location_assignment PIN_23 -to FPGA_CLK
 set_location_assignment PIN_25 -to RESET
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_location_assignment PIN_23 -to clk
+set_global_assignment -name SYSTEMVERILOG_FILE top.sv
+set_global_assignment -name SYSTEMVERILOG_FILE uart_tx.sv
 set_global_assignment -name SYSTEMVERILOG_FILE PC.sv
 set_global_assignment -name SYSTEMVERILOG_FILE control.sv
 set_global_assignment -name SYSTEMVERILOG_FILE register_file.sv
@@ -76,11 +80,10 @@ set_global_assignment -name SYSTEMVERILOG_FILE cpu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE shifter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE D_FF.sv
 set_global_assignment -name SYSTEMVERILOG_FILE shift_N_reg.sv
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
-set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name SYSTEMVERILOG_FILE branch_decider.sv
+set_global_assignment -name SYSTEMVERILOG_FILE FIFO.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ram_dual.sv
+set_global_assignment -name SYSTEMVERILOG_FILE FIFO_Control.sv
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
