@@ -1,7 +1,8 @@
 module cpu (
 	input logic clk, reset,
 	output logic data_write,
-	output logic [31:0] data_address, data
+	output logic [7:0] data,
+	output logic [31:0] data_address
 	);
 	
 	localparam STAGES_1 = 1;
@@ -95,8 +96,6 @@ module cpu (
 	
 	assign less_than = p_is_unsigned[STAGE_1] ? {31'b0, ~c_out} : {31'b0, (neg != over)};
 	assign slt_result = p_slt[STAGE_1] ? less_than : alu_result;
-
-	//	assign slt_result = p_slt[STAGE_1] ? {31'b0, neg} : alu_result; // TODO: handle unsigned
 	assign jump_result = p_jump[STAGE_1] ? (p_i_addr[STAGE_2]+4) : slt_result;
 	shifter s (.val(r_data1), .shamt(alu_B_in[4:0]), .shift_type(p_shift_type[STAGE_1]), .shifted_val);
 	assign EX_result = p_shift[STAGE_1] ? shifted_val : jump_result;
@@ -113,7 +112,7 @@ module cpu (
 	
 	assign data_write = p_mem_write[STAGE_2] & can_write;
 	assign data_address = p_EX_result[STAGE_1];
-	assign data = p_r_data2[STAGE_1];
+	assign data = p_r_data2[STAGE_1][7:0];
 endmodule
 
 `ifndef LINT

@@ -4,7 +4,6 @@ module control (
 	output logic [2:0] alu_op, xfer_size, branch_type,
 	output logic [1:0] shift_type,
 	output logic reg_write, alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg, jump, jalr, is_unsigned
-//	output logic cf_reg_write, cf_mem_to_reg, cf_alu_op, cf_alu_src, cf_slt, cf_shift, cf_shift_type
 	);
 	
 	// Sections of instruction
@@ -32,7 +31,7 @@ module control (
 	logic i_addi, i_slti, i_sltiu, i_xori, i_ori, i_andi, i_slli, i_srli, i_srai;
 	logic i_add, i_sub, i_sll, i_slt, i_sltu, i_xor, i_srl, i_sra, i_or, i_and;
 	
-	// Special opcodes?
+	// Special opcodes
 	assign i_lui 	= (opcode == 7'b0110111);
 	assign i_auipc = (opcode == 7'b0010111);
 	assign i_jal 	= (opcode == 7'b1101111);
@@ -108,7 +107,6 @@ module control (
 	imm_gen ig (.i_type(i_type), .instruction(instruction), .immediate(immediate));
 	
 	// Determine control flags
-	// cf_reg_write, cf_mem_to_reg, cf_alu_op, cf_alu_src, cf_slt, cf_shift, cf_shift_type
 	assign reg_write = (i_lui || i_auipc || i_jal || i_jalr || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_addi || i_slti || i_sltiu ||
 								i_xori || i_ori || i_andi || i_slli || i_srli || i_srai || i_add || i_sub || i_sll ||
 								i_slt || i_sltu || i_xor || i_srl || i_sra || i_or || i_and);

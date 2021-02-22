@@ -4,7 +4,7 @@ module instruction_mem (
 	output logic [31:0] instruction
 	);
 	
-	logic [31:0] mem [4095:0]; // TODO: determine how many instructions are needed
+	logic [31:0] mem [4095:0];
 	
 	initial begin
 		$readmemh("code.hex", mem);
@@ -12,9 +12,6 @@ module instruction_mem (
 	
 	always_ff @(posedge clk)
 		instruction <= mem[i_addr/4];
-//	always_comb begin
-//		instruction = mem[i_addr/4];
-//	end
 endmodule
 
 `ifndef LINT

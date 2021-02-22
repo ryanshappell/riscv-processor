@@ -82,7 +82,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE D_FF.sv
 set_global_assignment -name SYSTEMVERILOG_FILE shift_N_reg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE branch_decider.sv
 set_global_assignment -name SYSTEMVERILOG_FILE FIFO.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ram_dual.sv
 set_global_assignment -name SYSTEMVERILOG_FILE FIFO_Control.sv
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top

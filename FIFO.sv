@@ -18,7 +18,7 @@ module FIFO #(parameter DEPTH = 8) (
 	logic wr_en;
 	logic [DEPTH-1:0] writeAddr, readAddr;
 	
-	logic [7:0] ram [DEPTH-1:0];
+	logic [7:0] ram [2**DEPTH-1:0];
 	
 	always_ff @(posedge clk) begin
 		if (wr_en)
@@ -27,13 +27,11 @@ module FIFO #(parameter DEPTH = 8) (
 			outputBus <= ram[readAddr];
 	end
 	
-	// Memory portion of FIFO
-//	ram_dual #(DEPTH, WIDTH) r (.clk, .wr_en, .din(inputBus), .readAddr, .writeAddr, .dout(outputBus));
-	
 	// FIFO-Control_Module			
 	FIFO_Control #(DEPTH) FC (.clk, .reset, .read, .write, .wr_en, .empty, .full, .readAddr, .writeAddr);
 endmodule 
 
+`ifndef LINT
 module FIFO_testbench();
 	parameter DEPTH = 4, WIDTH = 8;
 	
@@ -69,4 +67,5 @@ module FIFO_testbench();
 		@(posedge clk);
 		$stop;
 	end
-endmodule 
+endmodule
+`endif

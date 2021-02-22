@@ -7,7 +7,7 @@ module data_mem (
 	output logic [31:0] r_data
 	);
 	
-	logic [3:0][7:0] mem [1023:0]; // TODO: determine how many bytes are needed
+	logic [3:0][7:0] mem [1023:0];
 	logic [3:0] byte_en;
 	logic [3:0][7:0] word;
 	
@@ -20,8 +20,8 @@ module data_mem (
 	
 	always_comb begin
 		case (xfer_size)
-			1: byte_en = (4'b1 << (address % 4)); // one of the 4 bytes enabled
-			2: byte_en = (4'b11 << (2 * ((address % 4) / 2))); // 4'b1100 or 4'b0011
+			1: byte_en = (4'b1 << (address % 4));
+			2: byte_en = (4'b11 << (2 * ((address % 4) / 2)));
 			4:	byte_en = 4'b1111;
 			default: byte_en = 4'b1111;
 		endcase

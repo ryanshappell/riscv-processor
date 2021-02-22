@@ -4,7 +4,6 @@ module PC (
 	output logic [31:0] i_addr,
 	output logic can_write
 	);
-	// START WITHOUT BRANCHING, SO ONLY PC+4
 	
 	// Current instruction address
 	logic [31:0] curr_addr;
@@ -17,7 +16,7 @@ module PC (
 	always @(posedge clk) begin
 		if (reset) begin
 			count <= 0;
-			curr_addr <= 0; // TODO: determine start of instruction memory
+			curr_addr <= 0;
 		end else begin
 			if (count == 3'b100) begin
 				// Increment PC

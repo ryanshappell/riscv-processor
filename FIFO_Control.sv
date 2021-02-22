@@ -57,6 +57,7 @@ output logic [DEPTH-1:0] writeAddr, readAddr
 	end
 endmodule
 
+`ifndef LINT
 module FIFO_Control_testbench();
 	logic clk, reset, read, write, wr_en, empty, full;
 	logic [2-1:0] writeAddr;
@@ -95,3 +96,4 @@ module FIFO_Control_testbench();
 		$stop;
 	end
 endmodule
+`endif

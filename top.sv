@@ -5,21 +5,6 @@ module top (
 	output logic UART_TXD
 	);
 	
-//	logic 			instuction_valid;
-//	logic [31:0]	instruction_addr;
-//	logic [31:0]   instruction_read;
-//	logic          instruction_ready;
-//	logic          instruction_ack;
-//
-//	logic          data_read_valid;
-//	logic          data_write_valid;
-//	logic [31:0]   data_addr;
-//	logic [31:0]   data_read;
-//	logic [31:0]   data_write;
-//	logic [3:0]    data_write_byte;
-//	logic          data_ready;
-//	logic          data_ack;
-	
 	logic reset;
 	assign reset = ~RESET;
 	
@@ -27,10 +12,12 @@ module top (
 	assign DIG[3:0] = 0;
 	
 	logic data_write;
-	logic [31:0] data_address, data;
+	logic [7:0] data;
+	logic [31:0] data_address;
 	
 	cpu c (.clk, .reset, .data_write, .data_address, .data);
 	
+	// Test printout for sim
 	always_comb begin
 		if (data_write && (data_address == 'h0002FFF8))
 			$write("%c", data[7:0]);
@@ -40,37 +27,9 @@ module top (
 	logic [7:0] fifo_out;
 	uart_tx utx (.clk, .reset(reset), .tx_data_ready(~empty), .tx_data(fifo_out), .txd(UART_TXD), .tx_ready);
 	
-	FIFO #(.DEPTH(200)) fifo (.clk, .reset, .read(tx_ready), .write(data_write && (data_address == 'h2FFF8)), .inputBus(data[7:0]), .empty, .full(), .outputBus(fifo_out));
-	
-	
-	// RESET = 1 when unpressed, 0 when pressed
-	
-	// TEST CODE FOR UART
-//	logic [7:0] tx_data;
-//	logic tx_data_ready, tx_ready;
-//	
-//	uart_tx utx (.clk, .reset(reset), .tx_data_ready(tx_data_ready), .tx_data(tx_data), .txd(UART_TXD), .tx_ready(tx_ready));
-	
-//	`define text "Hello world!\r\n"
-//	logic [$bits(`text)-1:0] serial_string_buf;
-//	localparam text_len = $bits(serial_string_buf);
-//	logic last_tx_ready;
-//
-//	assign tx_data_ready = 1'b1;
-//	assign tx_data = serial_string_buf[text_len-1:text_len-8];
-//
-//	always_ff @(posedge clk) begin
-//		if (reset) begin
-//			serial_string_buf <= `text;
-//			last_tx_ready <= 1'b0;
-//		end else if (tx_ready && !last_tx_ready) begin
-//			serial_string_buf <= { serial_string_buf[text_len-8-1:0], serial_string_buf[text_len-1:text_len-8] };
-//			last_tx_ready <= tx_ready;
-//		end else begin
-//			serial_string_buf <= serial_string_buf;
-//			last_tx_ready <= tx_ready;
-//		end
-//	end
+	// verilator lint_off PINCONNECTEMPTY
+	FIFO fifo (.clk, .reset, .read(tx_ready), .write(data_write && (data_address == 'h2FFF8)), .inputBus(data[7:0]), .empty, .full(), .outputBus(fifo_out));
+	// verilator lint_on PINCONNECTEMPTY
 endmodule
 
 `ifndef LINT

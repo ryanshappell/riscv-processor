@@ -8,15 +8,8 @@ module register_file (
 	// Registers
 	logic [31:0] regs [31:0];
 	
-//	logic [31:0] r1, r2;
-	
 	// Write to register if write enabled (excluding x0)
 	always_ff @(posedge clk) begin
-//		if (reg_write)
-//			regs[w_addr] <= w_data;
-//		r1 <= regs[r_addr1];
-//		r2 <= regs[r_addr2];
-	
 		if (reset)
 			regs[0] <= 0;
 		else begin
@@ -28,8 +21,6 @@ module register_file (
 			r_data2 <= regs[r_addr2];
 		end
 	end
-//	assign r_data1 = r1;
-//	assign r_data2 = r2;
 endmodule
 
 `ifndef LINT
