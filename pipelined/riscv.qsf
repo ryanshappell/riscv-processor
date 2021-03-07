@@ -39,7 +39,7 @@
 
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE6E22C8
-set_global_assignment -name TOP_LEVEL_ENTITY cpu
+set_global_assignment -name TOP_LEVEL_ENTITY top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.0.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:35:15  FEBRUARY 05, 2021"
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.0 Lite Edition"
@@ -60,7 +60,6 @@ set_location_assignment PIN_135 -to DIG[1]
 set_location_assignment PIN_136 -to DIG[2]
 set_location_assignment PIN_137 -to DIG[3]
 set_location_assignment PIN_114 -to UART_TXD
-set_location_assignment PIN_115 -to UART_RXD
 set_location_assignment PIN_25 -to RESET
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
