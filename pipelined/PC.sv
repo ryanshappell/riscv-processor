@@ -1,32 +1,21 @@
 module PC (
 	input logic clk, reset, pc_src,
 	input logic [31:0] jump_addr,
-	output logic [31:0] i_addr,
-	output logic can_write
+	output logic [31:0] i_addr
 	);
 	
 	// Current instruction address
 	logic [31:0] curr_addr;
 	
-	// Counter for 5 cycles
-	logic [2:0] count;
-	
-	assign can_write = (count == 3'b100);
-	
 	always @(posedge clk) begin
 		if (reset) begin
-			count <= 0;
 			curr_addr <= 0;
 		end else begin
-			if (count == 3'b100) begin
-				// Increment PC
-				if (pc_src)
-					curr_addr <= jump_addr;
-				else
-					curr_addr <= curr_addr + 4;
-				count <= 0;
-			end else
-				count <= count + 1'b1;
+			// Increment PC
+			if (pc_src)
+				curr_addr <= jump_addr;
+			else
+				curr_addr <= curr_addr + 4;
 		end
 	end
 	
@@ -38,7 +27,6 @@ module PC_tb ();
 	logic clk, reset, pc_src;
 	logic [31:0] jump_addr;
 	logic [31:0] i_addr;
-	logic can_write;
 	
 	PC dut (.*);
 	

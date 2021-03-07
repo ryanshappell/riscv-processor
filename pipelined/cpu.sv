@@ -14,7 +14,8 @@ module cpu (
 	localparam STAGE_3 = 2;
 	
 	// Piped values
-	logic [STAGE_1:0][31:0] p_r_data2, p_immediate, p_jump_addr;
+	logic [STAGE_1:0][31:0] p_forward_B, p_immediate, p_jump_addr;
+	logic [STAGE_1:0][4:0] p_rs1, p_rs2;
 	logic [STAGE_1:0][2:0] p_alu_op;
 	logic [STAGE_1:0][1:0] p_shift_type;
 	logic [STAGE_1:0] p_alu_src, p_auipc, p_shift, p_slt, p_jalr, p_jump, p_pc_src;
@@ -23,13 +24,16 @@ module cpu (
 	logic [STAGE_2:0][2:0] p_xfer_size, p_branch_type;
 	logic [STAGE_2:0] p_mem_write, p_mem_read, p_is_unsigned;
 	
+	logic [STAGE_3:0][4:0] p_rd;
 	logic [STAGE_3:0] p_reg_write, p_mem_to_reg;
 	
 	// IF stage outputs
 	logic [31:0] i_addr, instruction, jump_addr;
+	// Parts of instruction
+	logic [4:0] rd, rs1, rs2;
 	
 	// ID stage outputs
-	logic [31:0] r_data1, r_data2, immediate;
+	logic [31:0] r_data1, r_data2, immediate, forward_A, forward_B;
 	logic [2:0] alu_op, xfer_size, branch_type;
 	logic [1:0] shift_type;
 	logic alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg, pc_src, jump, jalr, is_unsigned;
@@ -45,9 +49,11 @@ module cpu (
 	logic reg_write;
 	
 	// Pipeline stage buffers
-	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_r_data2 (.clk, .reset, .in(r_data2), .out(p_r_data2));
+	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_r_forward_B (.clk, .reset, .in(forward_B), .out(p_forward_B));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_immediate (.clk, .reset, .in(immediate), .out(p_immediate));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_jump_addr (.clk, .reset, .in(jump_addr), .out(p_jump_addr));
+	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(5)) shift_rs1 (.clk, .reset, .in(rs1), .out(p_rs1));
+	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(5)) shift_rs2 (.clk, .reset, .in(rs2), .out(p_rs2));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(3)) shift_alu_op (.clk, .reset, .in(alu_op), .out(p_alu_op));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(2)) shift_shift_type (.clk, .reset, .in(shift_type), .out(p_shift_type));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(1)) shift_alu_src (.clk, .reset, .in(alu_src), .out(p_alu_src));
@@ -66,38 +72,43 @@ module cpu (
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(1)) shift_mem_read (.clk, .reset, .in(mem_read), .out(p_mem_read));
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(1)) shift_is_unsigned (.clk, .reset, .in(is_unsigned), .out(p_is_unsigned));
 	
+	shift_N_reg #(.WIDTH(STAGES_3), .HEIGHT(5)) shift_rd (.clk, .reset, .in(rd), .out(p_rd));
 	shift_N_reg #(.WIDTH(STAGES_3), .HEIGHT(1)) shift_reg_write (.clk, .reset, .in(reg_write), .out(p_reg_write));
 	shift_N_reg #(.WIDTH(STAGES_3), .HEIGHT(1)) shift_mem_to_reg (.clk, .reset, .in(mem_to_reg), .out(p_mem_to_reg));
 	
 	// Piece together the cpu lol
 	// IF
-	logic can_write;
 	logic [31:0] jump_addr_src;
 	assign jump_addr_src = p_jalr[STAGE_1] ? r_data1 : p_i_addr[STAGE_2];
 	assign jump_addr = jump_addr_src + p_immediate[STAGE_1];
-	PC pc (.clk, .reset, .pc_src(p_pc_src[STAGE_1]), .jump_addr(p_jump_addr[STAGE_1]), .i_addr, .can_write);
+	PC pc (.clk, .reset, .pc_src(p_pc_src[STAGE_1]), .jump_addr(p_jump_addr[STAGE_1]), .i_addr);
 	instruction_mem imem (.clk, .i_addr, .instruction);
+	assign rd = instruction[11:7];
+	assign rs1 = instruction[19:15];
+	assign rs2 = instruction[24:20];
 	
 	// ID
 	control c (.instruction, .immediate, .shift_type, .branch_type, .reg_write(reg_write), .alu_op, .alu_src, .auipc, .shift, .slt, .mem_write, .mem_read, .xfer_size, .mem_to_reg, .jump, .jalr, .is_unsigned);
-	register_file rf (.clk, .reset, .reg_write((p_reg_write[STAGE_3] && can_write)), .r_addr1(instruction[19:15]),
-							.r_addr2(instruction[24:20]), .w_addr(instruction[11:7]),
+	register_file rf (.clk, .reset, .reg_write((p_reg_write[STAGE_3])), .r_addr1(rs1),
+							.r_addr2(rs2), .w_addr(p_rd[STAGE_3]),
 							.w_data, .r_data1, .r_data2);
 	
 	// EX
-	logic [31:0] alu_A_in, alu_B_in, alu_result, slt_result, jump_result, shifted_val;
+	logic [31:0] alu_A_in, alu_B_in, alu_result, slt_result, jump_result, shifted_val, less_than;
 	logic zero, neg, c_out, over;
 	
-	logic [31:0] less_than;
+	forwarding_unit fu (.EX_MEM_reg_write(p_reg_write[STAGE_2]), .MEM_WB_reg_write(p_reg_write[STAGE_3]),
+							.rs1(p_rs1[STAGE_1]), .rs2(p_rs2[STAGE_1]), .EX_MEM_rd(p_rd[STAGE_2]), .MEM_WB_rd(p_rd[STAGE_3]),
+							.r_data1, .r_data2, .EX_MEM_out(p_EX_result[STAGE_1]), .MEM_WB_out(w_data), .forward_A, .forward_B);
 	
-	assign alu_A_in = p_auipc[STAGE_1] ? p_i_addr[STAGE_2] : r_data1;
-	assign alu_B_in = p_alu_src[STAGE_1] ? p_immediate[STAGE_1] : r_data2;
+	assign alu_A_in = p_auipc[STAGE_1] ? p_i_addr[STAGE_2] : forward_A;
+	assign alu_B_in = p_alu_src[STAGE_1] ? p_immediate[STAGE_1] : forward_B;
 	alu a (.A(alu_A_in), .B(alu_B_in), .alu_op(p_alu_op[STAGE_1]), .result(alu_result), .zero, .neg, .c_out, .over);
 	
 	assign less_than = p_is_unsigned[STAGE_1] ? {31'b0, ~c_out} : {31'b0, (neg != over)};
 	assign slt_result = p_slt[STAGE_1] ? less_than : alu_result;
 	assign jump_result = p_jump[STAGE_1] ? (p_i_addr[STAGE_2]+4) : slt_result;
-	shifter s (.val(r_data1), .shamt(alu_B_in[4:0]), .shift_type(p_shift_type[STAGE_1]), .shifted_val);
+	shifter s (.val(forward_A), .shamt(alu_B_in[4:0]), .shift_type(p_shift_type[STAGE_1]), .shifted_val);
 	assign EX_result = p_shift[STAGE_1] ? shifted_val : jump_result;
 	
 	logic branch_taken;
@@ -105,21 +116,22 @@ module cpu (
 	branch_decider bd (.branch_type(p_branch_type[STAGE_2]), .zero, .neg, .c_out, .over, .branch_taken);
 	
 	// MEM
-	data_mem dm (.clk, .mem_write(p_mem_write[STAGE_2] & can_write), .mem_read(p_mem_read[STAGE_2]), .is_unsigned(p_is_unsigned[STAGE_2]), .xfer_size(p_xfer_size[STAGE_2]), .address(p_EX_result[STAGE_1] - 65536), .w_data(p_r_data2[STAGE_1]), .r_data);
+	data_mem dm (.clk, .mem_write(p_mem_write[STAGE_2]), .mem_read(p_mem_read[STAGE_2]), .is_unsigned(p_is_unsigned[STAGE_2]), .xfer_size(p_xfer_size[STAGE_2]), .address(p_EX_result[STAGE_1] - 65536), .w_data(p_forward_B[STAGE_1]), .r_data);
 	
 	// WB
 	assign w_data = p_mem_to_reg[STAGE_3] ? r_data : p_EX_result[STAGE_2];
 	
-	assign data_write = p_mem_write[STAGE_2] & can_write;
+	assign data_write = p_mem_write[STAGE_2];
 	assign data_address = p_EX_result[STAGE_1];
-	assign data = p_r_data2[STAGE_1][7:0];
+	assign data = p_forward_B[STAGE_1][7:0];
 endmodule
 
 `ifndef LINT
 module cpu_tb ();
 	logic clk, reset;
 	logic data_write;
-	logic [31:0] data_address, data;
+	logic [7:0] data;
+	logic [31:0] data_address;
 	
 	cpu dut (.*);
 	
@@ -132,7 +144,7 @@ module cpu_tb ();
 	initial begin
 		reset <= 1; @(posedge clk);
 		reset <= 0; @(posedge clk);
-		for (int i = 0; i < 5000; i++)
+		for (int i = 0; i < 100; i++)
 			@(posedge clk);
 		$stop;
 	end

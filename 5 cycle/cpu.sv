@@ -119,7 +119,8 @@ endmodule
 module cpu_tb ();
 	logic clk, reset;
 	logic data_write;
-	logic [31:0] data_address, data;
+	logic [7:0] data;
+	logic [31:0] data_address;
 	
 	cpu dut (.*);
 	
@@ -132,7 +133,7 @@ module cpu_tb ();
 	initial begin
 		reset <= 1; @(posedge clk);
 		reset <= 0; @(posedge clk);
-		for (int i = 0; i < 5000; i++)
+		for (int i = 0; i < 100; i++)
 			@(posedge clk);
 		$stop;
 	end
