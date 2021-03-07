@@ -5,6 +5,8 @@ vlib work
 # All Verilog files that are part of this design should have
 # their own "vlog" line below.
 vlog cpu.sv
+vlog D_FF.sv
+vlog imm_gen.sv
 vlog PC.sv
 vlog shift_N_reg.sv
 vlog instruction_mem.sv

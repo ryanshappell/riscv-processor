@@ -36,6 +36,8 @@ module cpu (
 	// Parts of instruction
 	logic [4:0] rd, rs1, rs2;
 	
+	logic [31:0] jump_addr_src;
+	
 	// ID stage outputs
 	logic [31:0] r_data1, r_data2, immediate, forward_A, forward_B;
 	logic [2:0] alu_op, xfer_size, branch_type;
@@ -44,6 +46,10 @@ module cpu (
 	
 	// EX stage outputs
 	logic [31:0] EX_result;
+	
+	logic [31:0] alu_A_in, alu_B_in, alu_result, slt_result, jump_result, shifted_val, less_than;
+	logic zero, neg, c_out, over;
+	logic branch_taken;
 	
 	// MEM stage outputs
 	logic [31:0] r_data;
@@ -84,7 +90,6 @@ module cpu (
 	
 	// Piece together the cpu lol
 	// IF
-	logic [31:0] jump_addr_src;
 	assign jump_addr_src = p_jalr[STAGE_1] ? r_data1 : p_i_addr[STAGE_2];
 	assign jump_addr = jump_addr_src + p_immediate[STAGE_1];
 	PC pc (.clk, .reset, .pc_src(p_pc_src[STAGE_1]), .jump_addr(p_jump_addr[STAGE_1]), .i_addr);
@@ -100,9 +105,6 @@ module cpu (
 							.w_data, .r_data1, .r_data2);
 	
 	// EX
-	logic [31:0] alu_A_in, alu_B_in, alu_result, slt_result, jump_result, shifted_val, less_than;
-	logic zero, neg, c_out, over;
-	
 	forwarding_unit fu (.EX_MEM_reg_write(p_reg_write[STAGE_2]), .MEM_WB_reg_write(p_reg_write[STAGE_3]), .reg_write(p_reg_write[STAGE_4]),
 							.rs1(p_rs1[STAGE_1]), .rs2(p_rs2[STAGE_1]), .EX_MEM_rd(p_rd[STAGE_2]), .MEM_WB_rd(p_rd[STAGE_3]), .w_addr(p_rd[STAGE_4]),
 							.r_data1, .r_data2, .EX_MEM_out(p_EX_result[STAGE_1]), .MEM_WB_out(w_data), .w_data(p_w_data[STAGE_1]), .forward_A, .forward_B);
@@ -117,7 +119,6 @@ module cpu (
 	shifter s (.val(forward_A), .shamt(alu_B_in[4:0]), .shift_type(p_shift_type[STAGE_1]), .shifted_val);
 	assign EX_result = p_shift[STAGE_1] ? shifted_val : jump_result;
 	
-	logic branch_taken;
 	assign pc_src = (p_jump[STAGE_1] || branch_taken);
 	branch_decider bd (.branch_type(p_branch_type[STAGE_2]), .zero, .neg, .c_out, .over, .branch_taken);
 	
