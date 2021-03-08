@@ -4,7 +4,7 @@ module instruction_mem (
 	output logic [31:0] instruction
 	);
 	
-	logic [31:0] mem [1023:0];
+	logic [31:0] mem [4095:0];
 	
 	initial begin
 		$readmemh("code.hex", mem);

@@ -16,7 +16,7 @@ module cpu (
 	localparam STAGE_4 = 3;
 	
 	// Piped values
-	logic [STAGE_1:0][31:0] p_forward_B, p_immediate, p_jump_addr, p_w_data;
+	logic [STAGE_1:0][31:0] p_forward_B, p_immediate, p_jump_addr, p_w_data, p_instruction;
 	logic [STAGE_1:0][4:0] p_rs1, p_rs2;
 	logic [STAGE_1:0][2:0] p_alu_op;
 	logic [STAGE_1:0][1:0] p_shift_type;
@@ -32,7 +32,7 @@ module cpu (
 	logic [STAGE_4:0] p_reg_write;
 	
 	// IF stage outputs
-	logic [31:0] i_addr, instruction, jump_addr;
+	logic [31:0] i_addr, instruction, jump_addr, latest_instruction;
 	// Parts of instruction
 	logic [4:0] rd, rs1, rs2;
 	
@@ -43,6 +43,8 @@ module cpu (
 	logic [2:0] alu_op, xfer_size, branch_type;
 	logic [1:0] shift_type;
 	logic alu_src, auipc, shift, slt, mem_write, mem_read, mem_to_reg, pc_src, jump, jalr, is_unsigned;
+	
+	logic stall, i_valid;
 	
 	// EX stage outputs
 	logic [31:0] EX_result;
@@ -59,10 +61,11 @@ module cpu (
 	logic reg_write;
 	
 	// Pipeline stage buffers
-	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_r_forward_B (.clk, .reset, .in(forward_B), .out(p_forward_B));
+	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_forward_B (.clk, .reset, .in(forward_B), .out(p_forward_B));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_immediate (.clk, .reset, .in(immediate), .out(p_immediate));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_jump_addr (.clk, .reset, .in(jump_addr), .out(p_jump_addr));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_w_data (.clk, .reset, .in(w_data), .out(p_w_data));
+	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(32)) shift_instruction (.clk, .reset, .in(latest_instruction), .out(p_instruction));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(5)) shift_rs1 (.clk, .reset, .in(rs1), .out(p_rs1));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(5)) shift_rs2 (.clk, .reset, .in(rs2), .out(p_rs2));
 	shift_N_reg #(.WIDTH(STAGES_1), .HEIGHT(3)) shift_alu_op (.clk, .reset, .in(alu_op), .out(p_alu_op));
@@ -79,21 +82,24 @@ module cpu (
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(32)) shift_EX_result (.clk, .reset, .in(EX_result), .out(p_EX_result));
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(3)) shift_xfer_size (.clk, .reset, .in(xfer_size), .out(p_xfer_size));
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(3)) shift_branch_type (.clk, .reset, .in(branch_type), .out(p_branch_type));
-	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(1)) shift_mem_write (.clk, .reset, .in(mem_write), .out(p_mem_write));
+	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(1)) shift_mem_write (.clk, .reset, .in(stall ? 1'b0 : mem_write), .out(p_mem_write));
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(1)) shift_mem_read (.clk, .reset, .in(mem_read), .out(p_mem_read));
 	shift_N_reg #(.WIDTH(STAGES_2), .HEIGHT(1)) shift_is_unsigned (.clk, .reset, .in(is_unsigned), .out(p_is_unsigned));
 	
 	shift_N_reg #(.WIDTH(STAGES_3), .HEIGHT(1)) shift_mem_to_reg (.clk, .reset, .in(mem_to_reg), .out(p_mem_to_reg));
 	
-	shift_N_reg #(.WIDTH(STAGES_4), .HEIGHT(1)) shift_reg_write (.clk, .reset, .in(reg_write), .out(p_reg_write));
+	shift_N_reg #(.WIDTH(STAGES_4), .HEIGHT(1)) shift_reg_write (.clk, .reset, .in(stall ? 1'b0 : reg_write), .out(p_reg_write));
 	shift_N_reg #(.WIDTH(STAGES_4), .HEIGHT(5)) shift_rd (.clk, .reset, .in(rd), .out(p_rd));
 	
 	// Piece together the cpu lol
 	// IF
 	assign jump_addr_src = p_jalr[STAGE_1] ? r_data1 : p_i_addr[STAGE_2];
 	assign jump_addr = jump_addr_src + p_immediate[STAGE_1];
-	PC pc (.clk, .reset, .pc_src(p_pc_src[STAGE_1]), .jump_addr(p_jump_addr[STAGE_1]), .i_addr);
-	instruction_mem imem (.clk, .i_addr, .instruction);
+	PC pc (.clk, .reset, .pc_src(p_pc_src[STAGE_1]), .stall, .jump_addr(p_jump_addr[STAGE_1]), .i_valid, .i_addr);
+	instruction_mem imem (.clk, .i_addr, .instruction(latest_instruction));
+	
+	assign instruction = i_valid ? latest_instruction : p_instruction[STAGE_1];
+	
 	assign rd = instruction[11:7];
 	assign rs1 = instruction[19:15];
 	assign rs2 = instruction[24:20];
@@ -103,6 +109,8 @@ module cpu (
 	register_file rf (.clk, .reset, .reg_write((p_reg_write[STAGE_3])), .r_addr1(rs1),
 							.r_addr2(rs2), .w_addr(p_rd[STAGE_3]),
 							.w_data, .r_data1, .r_data2);
+							
+	hazard_detection_unit hdu (.ID_EX_mem_read(p_mem_to_reg[STAGE_1]), .ID_EX_rd(p_rd[STAGE_1]), .IF_ID_rs1(rs1), .IF_ID_rs2(rs2), .stall);
 	
 	// EX
 	forwarding_unit fu (.EX_MEM_reg_write(p_reg_write[STAGE_2]), .MEM_WB_reg_write(p_reg_write[STAGE_3]), .reg_write(p_reg_write[STAGE_4]),
@@ -123,7 +131,8 @@ module cpu (
 	branch_decider bd (.branch_type(p_branch_type[STAGE_2]), .zero, .neg, .c_out, .over, .branch_taken);
 	
 	// MEM
-	data_mem dm (.clk, .mem_write(p_mem_write[STAGE_2]), .mem_read(p_mem_read[STAGE_2]), .is_unsigned(p_is_unsigned[STAGE_2]), .xfer_size(p_xfer_size[STAGE_2]), .address(p_EX_result[STAGE_1] - 65536), .w_data(p_forward_B[STAGE_1]), .r_data);
+	// TODO: readd " - 65536" to address input
+	data_mem dm (.clk, .mem_write(p_mem_write[STAGE_2]), .mem_read(p_mem_read[STAGE_2]), .is_unsigned(p_is_unsigned[STAGE_2]), .xfer_size(p_xfer_size[STAGE_2]), .address(p_EX_result[STAGE_1]), .w_data(p_forward_B[STAGE_1]), .r_data);
 	
 	// WB
 	assign w_data = p_mem_to_reg[STAGE_3] ? r_data : p_EX_result[STAGE_2];

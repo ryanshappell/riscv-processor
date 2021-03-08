@@ -17,6 +17,7 @@ vlog shifter.sv
 vlog branch_decider.sv
 vlog data_mem.sv
 vlog forwarding_unit.sv
+vlog hazard_detection_unit.sv
 
 # Call vsim to invoke simulator
 # Make sure the last item on the line is the name of the
