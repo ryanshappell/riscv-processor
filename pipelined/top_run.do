@@ -18,7 +18,8 @@ vlog data_mem.sv
 vlog uart_tx.sv
 vlog FIFO.sv
 vlog FIFO_Control.sv
-vlog ram_dual.sv
+vlog forwarding_unit.sv
+vlog hazard_detection_unit.sv
 
 # Call vsim to invoke simulator
 # Make sure the last item on the line is the name of the
