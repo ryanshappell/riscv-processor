@@ -33,11 +33,6 @@ module forwarding_unit (
 			else
 				forward_B = r_data2;
 		end
-		
-		// FORWARD C
-		// will forward either w_data (from mem wb stage) or pass through r_data2
-		// forward w_data if you are writing to memory, and rs2 == rs1 of prev instruction
-//		if (rs2 == EX_MEM_rd && EX_MEM_reg_write)
 	end
 endmodule
 
