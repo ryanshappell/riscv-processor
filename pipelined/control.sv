@@ -1,5 +1,6 @@
 module control (
 	input logic [31:0] instruction,
+	input logic i_valid,
 	output logic [31:0] immediate,
 	output logic [2:0] alu_op, xfer_size, branch_type,
 	output logic [1:0] shift_type,
@@ -107,7 +108,7 @@ module control (
 	imm_gen ig (.i_type(i_type), .instruction(instruction), .immediate(immediate));
 	
 	// Determine control flags
-	assign reg_write = (i_lui || i_auipc || i_jal || i_jalr || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_addi || i_slti || i_sltiu ||
+	assign reg_write = i_valid && (i_lui || i_auipc || i_jal || i_jalr || i_lb || i_lh || i_lw || i_lbu || i_lhu || i_addi || i_slti || i_sltiu ||
 								i_xori || i_ori || i_andi || i_slli || i_srli || i_srai || i_add || i_sub || i_sll ||
 								i_slt || i_sltu || i_xor || i_srl || i_sra || i_or || i_and);
 	always_comb begin
@@ -141,7 +142,7 @@ module control (
 			shift_type = 0;
 	end
 	assign slt = (i_slti || i_sltiu || i_slt || i_sltu);
-	assign mem_write = (i_sb || i_sh || i_sw);
+	assign mem_write = i_valid && (i_sb || i_sh || i_sw);
 	assign mem_read = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
 	always_comb begin
 		if (i_lb || i_lbu || i_sb)
@@ -154,8 +155,8 @@ module control (
 			xfer_size = 4;
 	end
 	assign mem_to_reg = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
-	assign jump = (i_jal || i_jalr);
-	assign jalr = i_jalr;
+	assign jump = i_valid && (i_jal || i_jalr);
+	assign jalr = i_valid && i_jalr;
 	always_comb begin
 		if (i_beq)
 			branch_type = 1;
