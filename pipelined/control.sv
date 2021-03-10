@@ -154,11 +154,13 @@ module control (
 		else
 			xfer_size = 4;
 	end
-	assign mem_to_reg = (i_lb || i_lh || i_lw || i_lbu || i_lhu);
+	assign mem_to_reg = i_valid && (i_lb || i_lh || i_lw || i_lbu || i_lhu);
 	assign jump = i_valid && (i_jal || i_jalr);
 	assign jalr = i_valid && i_jalr;
 	always_comb begin
-		if (i_beq)
+		if (~i_valid)
+			branch_type = 0;
+		else if (i_beq)
 			branch_type = 1;
 		else if (i_bne)
 			branch_type = 2;

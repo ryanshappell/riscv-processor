@@ -105,7 +105,7 @@ module cpu (
 	branch_decider bd (.branch_type(p_branch_type[STAGE_2]), .zero, .neg, .c_out, .over, .branch_taken);
 	
 	// MEM
-	data_mem dm (.clk, .mem_write(p_mem_write[STAGE_2] & can_write), .mem_read(p_mem_read[STAGE_2]), .is_unsigned(p_is_unsigned[STAGE_2]), .xfer_size(p_xfer_size[STAGE_2]), .address(p_EX_result[STAGE_1]), .w_data(p_r_data2[STAGE_1]), .r_data);
+	data_mem dm (.clk, .mem_write(p_mem_write[STAGE_2] & can_write), .mem_read(p_mem_read[STAGE_2]), .is_unsigned(p_is_unsigned[STAGE_2]), .xfer_size(p_xfer_size[STAGE_2]), .address(p_EX_result[STAGE_1] - 65536), .w_data(p_r_data2[STAGE_1]), .r_data);
 	
 	// WB
 	assign w_data = p_mem_to_reg[STAGE_3] ? r_data : p_EX_result[STAGE_2];
